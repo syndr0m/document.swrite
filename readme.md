@@ -51,7 +51,9 @@ document.swrite is provided to buffer calls to document.write() inside your scri
    |
    o returning full HTML.
 ```
- 
+
+![schema](https://raw.github.com/syndr0m/document.swrite/master/doc/document.swrite.jpg)
+
 ## Limitations
 
   - only works with valid html on single level of consecutive scripts
