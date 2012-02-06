@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+   <script type="text/javascript" src="http://syndr0m.com:8080/statics/document.swrite.js"></script>
+   <style type="text/css">
+      .buffered { display:none; }
+   </style>
+</head>
+<!--
+
+
+
+
+-->
+<body>
+   <table border="1">
+   <tr>
+      <td width="50%">Native (document.write)</td><td width="50%">Buffered (document.swrite)</td>
+   </tr>
+   <tr>
+      <td>
+         test 1 [OK]
+      </td>
+      <td>
+         test 1 [OK]
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <div class="ok">test 2 [OK]</div>
+      </td>
+      <td>
+         <div class="ok">test 2 [OK]</div>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <script type="text/javascript">document.write('test 3 [OK]')</script>
+      </td>
+      <td>
+         <script type="text/myscript">document.write('test 3 [OK]')</script>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <script type="text/javascript">document.write('<div>test')</script>
+         <script type="text/javascript">document.write('4')</script>
+         <script type="text/javascript">document.write('[OK]</div>')</script>
+      </td>
+      <td>
+         <script type="text/myscript">document.write('<div>test')</script>
+         <script type="text/myscript">document.write('4')</script>
+         <script type="text/myscript">document.write('[OK]</div>')</script>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <i>
+            <script type="text/javascript">document.write('<span>te')</script>
+            <script type="text/javascript">document.write('st</span>')</script>
+         </i>
+         <script type="text/javascript">document.write('5')</script>
+         <b>
+            <script type="text/javascript">document.write('[OK]</div>')</script>
+         </b>
+      </td>
+      <td>
+         <i>
+            <script type="text/myscript">document.write('<span>te')</script>
+            <script type="text/myscript">document.write('st</span>')</script>
+         </i>
+         <script type="text/myscript">document.write('5')</script>
+         <b>
+            <script type="text/myscript">document.write('[OK]</div>')</script>
+         </b>
+      </td>
+   </tr>
+   </table>
+
+   <script>
+   // some quick & dirty units tests =)
+   $(document).ready(function () {
+      // myscript => javascript
+      $("script").each(function () {
+         $(this).attr("type", "text/javascript");
+      });
+
+      // buffered 
+      $("table tr").each(function (i) {
+         var $td = $(this).find("td:last")
+           , html = $td.html();
+         $td.empty();
+
+         document.swrite(html, function (html) {
+            $td.html(html);
+         });
+      });
+   });
+   </script>
+</body>
+</html>
