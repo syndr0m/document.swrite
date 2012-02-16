@@ -64,6 +64,8 @@
  * @param  function callback(html) resulting html.
  * @return void
  */
+var depth = 0; // debug
+
 document.swrite = (function () {
 
    
@@ -127,7 +129,9 @@ document.swrite = (function () {
       {
          // SYNC
          // ex: <script>alert('foo');</script>
+         try {
          $.globalEval($(script).html());
+         } catch (e) { console.log('catching error '+e); }
          callback();
       }
    }
@@ -165,6 +169,14 @@ document.swrite = (function () {
       document.write = function (html) {
          positionHtml += html
       };
+      
+      scripts = $.makeArray(scripts);
+      scripts.forEach(function (s, i) { 
+         if ($(s).attr("src"))
+            console.log('HarvestPosition : loading script '+ i + ' src='+$(s).attr("src"));
+         else
+            console.log('HarvestPosition : loading script '+ i + ' (eval)');
+      });
       
       loadScriptsRec($.makeArray(scripts), function () {
          // restore
@@ -219,14 +231,22 @@ document.swrite = (function () {
     */
    var swrite = function (html, callback)
    {
+      depth++;
+      console.log("swrite "+depth+" in : "+html);
       var node = document.createElement("div");
       node.innerHTML = html;
       var $html = $(node)
         , $html = computePositions($html)
 
+      console.log("func before : "+callback);
+        
       // position => [script, script, script]
       harvestPositionsRec($html, function ($htmldebug) {
-         callback($htmldebug.html());
+         var html = $htmldebug.html();
+         console.log("swrite "+depth+" out : "+html);
+         depth--;
+         console.log("func : "+callback);
+         callback(html);
       });
    };
    
@@ -239,18 +259,26 @@ document.swrite = (function () {
       return function (html, callback) {
          // semaphore
          calls.push(arguments)
-         if (calls.length > 1)
+         if (calls.length > 1) {
+            console.log("swrite: standby (" + calls.length + ")")
             return
+         }
 
-         // swrite
-         swrite(html, function (html) {
-            callback(html);
-            // next document.swrite()
-            calls.pop();
+         var writeAndPop = function (html, callback) {
+            // write
+            callback(html)
+            // pop ?
+            calls.shift()
             if (calls.length) {
-               swrite.apply(this, calls[0])
+               var h = calls[0][0]
+                 , c = calls[0][1]
+               swrite(h, function (html) { writeAndPop(html, c) })
             }
-         });
+         }
+         
+         swrite(html, function (html) {
+            writeAndPop(html, callback)
+         })
       }
    })()
 })()
