@@ -244,15 +244,19 @@ document.swrite = (function () {
          if (calls.length > 1)
             return
 
-         // swrite
-         swrite(html, function (html) {
-            callback(html);
-            // next document.swrite()
-            calls.pop();
-            if (calls.length) {
-               swrite.apply(this, calls[0])
-            }
-         });
+         // swrite & pop
+         (function (html, callback) {
+            var swriteAndPop = arguments.callee;
+            swrite(html, function (html) {
+               // write
+               callback(html)
+               // pop ?
+               calls.shift()
+               if (calls.length) {
+                  swriteAndPop.apply(this, calls[0]);
+               }
+            })
+         })(html, callback);
       }
    })()
 })()
