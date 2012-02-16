@@ -127,7 +127,9 @@ document.swrite = (function () {
       {
          // SYNC
          // ex: <script>alert('foo');</script>
+         try {
          $.globalEval($(script).html());
+         } catch (e) { }
          callback();
       }
    }
