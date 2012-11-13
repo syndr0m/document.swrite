@@ -56,6 +56,15 @@ document.swrite is provided to buffer calls to document.write() inside your scri
 
 ## Limitations
 
+  - will not work on self-referent document.write(DOM/scripts) because document.swrite() currently works in a buffer. (check test 6)
+
+``` js
+     var html = '<script>document.write(\'<div id="foo"></div>\');document.write(\'<script>$("#foo");</script>');</script>'
+     document.swrite(html, function (html) {
+        console.log(html) // => (empty)
+     });
+```
+
   - only works with valid html on single level of consecutive scripts
   This will not work :
 
